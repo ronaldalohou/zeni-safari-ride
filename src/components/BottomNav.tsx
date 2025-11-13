@@ -1,0 +1,65 @@
+import { Home, Search, User, Plus } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+
+export const BottomNav = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive = (path: string) => location.pathname === path;
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg">
+      <div className="flex items-center justify-around p-2 max-w-md mx-auto">
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`flex-col h-auto py-2 ${isActive("/") ? "text-primary" : "text-muted-foreground"}`}
+          onClick={() => navigate("/")}
+        >
+          <Home className="w-6 h-6" />
+          <span className="text-xs mt-1">Accueil</span>
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`flex-col h-auto py-2 ${isActive("/search") ? "text-primary" : "text-muted-foreground"}`}
+          onClick={() => navigate("/search")}
+        >
+          <Search className="w-6 h-6" />
+          <span className="text-xs mt-1">Rechercher</span>
+        </Button>
+
+        <Button
+          variant="default"
+          size="icon"
+          className="rounded-full w-14 h-14 -mt-6 shadow-lg"
+          onClick={() => navigate("/publish")}
+        >
+          <Plus className="w-6 h-6" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`flex-col h-auto py-2 ${isActive("/bookings") ? "text-primary" : "text-muted-foreground"}`}
+          onClick={() => navigate("/bookings")}
+        >
+          <Search className="w-6 h-6" />
+          <span className="text-xs mt-1">Réservations</span>
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`flex-col h-auto py-2 ${isActive("/profile") ? "text-primary" : "text-muted-foreground"}`}
+          onClick={() => navigate("/profile")}
+        >
+          <User className="w-6 h-6" />
+          <span className="text-xs mt-1">Profil</span>
+        </Button>
+      </div>
+    </div>
+  );
+};
