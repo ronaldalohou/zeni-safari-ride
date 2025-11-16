@@ -21,6 +21,7 @@ export type Database = {
           document_url: string
           id: string
           rejection_reason: string | null
+          selfie_url: string | null
           status: string | null
           updated_at: string
           user_id: string
@@ -32,6 +33,7 @@ export type Database = {
           document_url: string
           id?: string
           rejection_reason?: string | null
+          selfie_url?: string | null
           status?: string | null
           updated_at?: string
           user_id: string
@@ -43,6 +45,7 @@ export type Database = {
           document_url?: string
           id?: string
           rejection_reason?: string | null
+          selfie_url?: string | null
           status?: string | null
           updated_at?: string
           user_id?: string
@@ -55,6 +58,7 @@ export type Database = {
           created_at: string
           full_name: string
           id: string
+          is_admin: boolean | null
           phone: string | null
           photo_url: string | null
           rating: number | null
@@ -67,6 +71,7 @@ export type Database = {
           created_at?: string
           full_name: string
           id?: string
+          is_admin?: boolean | null
           phone?: string | null
           photo_url?: string | null
           rating?: number | null
@@ -79,6 +84,7 @@ export type Database = {
           created_at?: string
           full_name?: string
           id?: string
+          is_admin?: boolean | null
           phone?: string | null
           photo_url?: string | null
           rating?: number | null
