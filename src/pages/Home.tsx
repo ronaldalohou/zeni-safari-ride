@@ -16,13 +16,13 @@ export default function Home() {
   const [departure, setDeparture] = useState("");
   const [destination, setDestination] = useState("");
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    if (user === null) {
+    if (!loading && !user) {
       navigate('/auth');
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   const handleSearch = () => {
     if (departure && destination) {
