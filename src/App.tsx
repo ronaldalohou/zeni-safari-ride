@@ -11,6 +11,7 @@ import Publish from "./pages/Publish";
 import Bookings from "./pages/Bookings";
 import Auth from "./pages/Auth";
 import VerifyIdentity from "./pages/VerifyIdentity";
+import AdminVerification from "./pages/AdminVerification";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/verify-identity" element={<VerifyIdentity />} />
+          <Route path="/admin/verifications" element={<AdminVerification />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
