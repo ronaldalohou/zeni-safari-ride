@@ -23,7 +23,8 @@ export default function VerifyIdentity() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<DocumentType>('id_card');
-  const [file, setFile] = useState<File | null>(null);
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [verification, setVerification] = useState<Verification | null>(null);
 
@@ -51,7 +52,7 @@ export default function VerifyIdentity() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'selfie' | 'document') => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       
@@ -67,32 +68,53 @@ export default function VerifyIdentity() {
         return;
       }
 
-      setFile(selectedFile);
+      if (type === 'selfie') {
+        setSelfieFile(selectedFile);
+      } else {
+        setDocumentFile(selectedFile);
+      }
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!file || !user) return;
+    if (!selfieFile || !documentFile || !user) {
+      toast.error('Veuillez télécharger votre selfie ET votre pièce d\'identité');
+      return;
+    }
 
     try {
       setLoading(true);
 
-      // Upload file to storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      // Upload selfie
+      const selfieExt = selfieFile.name.split('.').pop();
+      const selfieName = `${user.id}/selfie_${Date.now()}.${selfieExt}`;
       
-      const { error: uploadError } = await supabase.storage
+      const { error: selfieUploadError } = await supabase.storage
         .from('identity-documents')
-        .upload(fileName, file);
+        .upload(selfieName, selfieFile);
 
-      if (uploadError) throw uploadError;
+      if (selfieUploadError) throw selfieUploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      // Upload document
+      const docExt = documentFile.name.split('.').pop();
+      const docName = `${user.id}/document_${Date.now()}.${docExt}`;
+      
+      const { error: docUploadError } = await supabase.storage
         .from('identity-documents')
-        .getPublicUrl(fileName);
+        .upload(docName, documentFile);
+
+      if (docUploadError) throw docUploadError;
+
+      // Get public URLs
+      const { data: { publicUrl: selfieUrl } } = supabase.storage
+        .from('identity-documents')
+        .getPublicUrl(selfieName);
+
+      const { data: { publicUrl: docUrl } } = supabase.storage
+        .from('identity-documents')
+        .getPublicUrl(docName);
 
       // Create verification record
       const { error: insertError } = await supabase
@@ -100,15 +122,17 @@ export default function VerifyIdentity() {
         .insert({
           user_id: user.id,
           document_type: selectedType,
-          document_url: publicUrl,
+          document_url: docUrl,
+          selfie_url: selfieUrl,
           status: 'pending'
         });
 
       if (insertError) throw insertError;
 
-      toast.success('Document envoyé ! En attente de vérification ⏳');
+      toast.success('Documents envoyés ! En attente de vérification ⏳');
       fetchVerification();
-      setFile(null);
+      setSelfieFile(null);
+      setDocumentFile(null);
     } catch (error: any) {
       toast.error(error.message || 'Erreur lors de l\'upload');
     } finally {
@@ -197,15 +221,42 @@ export default function VerifyIdentity() {
               </div>
 
               <div>
+                <Label htmlFor="selfie" className="text-base font-semibold mb-3 block">
+                  📸 Photo de votre visage (Selfie)
+                </Label>
+                <div className="relative">
+                  <input
+                    id="selfie"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, 'selfie')}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="selfie"
+                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                  >
+                    <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">
+                      {selfieFile ? selfieFile.name : 'Prenez un selfie clair de votre visage'}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Max 5 MB - JPG, PNG
+                    </p>
+                  </label>
+                </div>
+              </div>
+
+              <div>
                 <Label htmlFor="document" className="text-base font-semibold mb-3 block">
-                  Uploader le document
+                  🪪 Photo de la pièce d'identité
                 </Label>
                 <div className="relative">
                   <input
                     id="document"
                     type="file"
                     accept="image/*"
-                    onChange={handleFileChange}
+                    onChange={(e) => handleFileChange(e, 'document')}
                     className="hidden"
                   />
                   <label
@@ -214,7 +265,7 @@ export default function VerifyIdentity() {
                   >
                     <Upload className="w-8 h-8 text-muted-foreground mb-2" />
                     <p className="text-sm text-muted-foreground">
-                      {file ? file.name : 'Cliquez pour sélectionner une image'}
+                      {documentFile ? documentFile.name : 'Photo recto/verso du document'}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Max 5 MB - JPG, PNG
@@ -226,7 +277,7 @@ export default function VerifyIdentity() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={!file || loading}
+                disabled={!selfieFile || !documentFile || loading}
               >
                 {loading ? 'Envoi en cours...' : 'Soumettre pour vérification'}
               </Button>
