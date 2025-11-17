@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Upload, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Upload, CheckCircle, XCircle, Clock, ArrowLeft, Shield } from 'lucide-react';
 
 type DocumentType = 'id_card' | 'passport' | 'driver_license';
 type VerificationStatus = 'pending' | 'approved' | 'rejected';
@@ -171,26 +171,48 @@ export default function VerifyIdentity() {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="bg-gradient-to-br from-primary to-secondary p-6 text-white">
-        <h1 className="text-2xl font-bold">Vérification d'identité</h1>
-        <p className="text-white/90 mt-1">Sécurisez votre compte</p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20">
+      {/* Header moderne avec bouton retour */}
+      <div className="relative bg-gradient-to-br from-primary via-primary to-primary/80 p-6 text-white shadow-lg">
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute left-4 top-6 flex items-center gap-2 text-white/90 hover:text-white transition-all hover:gap-3 group"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="text-sm font-medium">Retour</span>
+        </button>
+        
+        <div className="max-w-2xl mx-auto pt-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-3 bg-white/10 backdrop-blur-sm rounded-2xl">
+              <Shield className="w-8 h-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Vérification d'identité</h1>
+              <p className="text-white/90 mt-1 text-sm">Sécurisez votre compte en quelques étapes</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="p-4 space-y-4 max-w-2xl mx-auto">
+      <div className="p-6 space-y-6 max-w-2xl mx-auto -mt-6">
         {verification && (
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              {getStatusIcon(verification.status)}
+          <Card className="p-6 shadow-xl border-2 animate-fade-in bg-card/80 backdrop-blur-sm">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-primary/10 rounded-full">
+                {getStatusIcon(verification.status)}
+              </div>
               <div className="flex-1">
-                <h3 className="font-semibold">{getStatusText(verification.status)}</h3>
+                <h3 className="font-bold text-lg mb-1">{getStatusText(verification.status)}</h3>
                 <p className="text-sm text-muted-foreground">
                   Document : {documentTypes.find(t => t.value === verification.document_type)?.label}
                 </p>
                 {verification.rejection_reason && (
-                  <p className="text-sm text-destructive mt-2">
-                    Raison : {verification.rejection_reason}
-                  </p>
+                  <div className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                    <p className="text-sm text-destructive font-medium">
+                      Raison : {verification.rejection_reason}
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
@@ -198,33 +220,35 @@ export default function VerifyIdentity() {
         )}
 
         {(!verification || verification.status === 'rejected') && (
-          <Card className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <Card className="p-8 shadow-xl border-0 animate-fade-in bg-card/80 backdrop-blur-sm">
+            <form onSubmit={handleSubmit} className="space-y-8">
               <div>
-                <Label className="text-base font-semibold mb-3 block">
+                <Label className="text-lg font-bold mb-4 block flex items-center gap-2">
+                  <span className="text-2xl">📄</span>
                   Type de document
                 </Label>
-                <div className="grid grid-cols-1 gap-2">
+                <div className="grid grid-cols-1 gap-3">
                   {documentTypes.map((type) => (
                     <button
                       key={type.value}
                       type="button"
                       onClick={() => setSelectedType(type.value as DocumentType)}
-                      className={`p-4 rounded-lg border-2 transition-all text-left ${
+                      className={`p-5 rounded-2xl border-2 transition-all text-left font-medium hover:scale-[1.02] hover:shadow-lg ${
                         selectedType === type.value
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-primary/50'
+                          ? 'border-primary bg-primary/10 shadow-md scale-[1.02]'
+                          : 'border-border hover:border-primary/50 bg-card'
                       }`}
                     >
-                      {type.label}
+                      <span className="text-lg">{type.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="selfie" className="text-base font-semibold mb-3 block">
-                  📸 Photo de votre visage (Selfie)
+                <Label htmlFor="selfie" className="text-lg font-bold mb-4 block flex items-center gap-2">
+                  <span className="text-2xl">📸</span>
+                  Photo de votre visage (Selfie)
                 </Label>
                 <div className="relative">
                   <input
@@ -236,22 +260,27 @@ export default function VerifyIdentity() {
                   />
                   <label
                     htmlFor="selfie"
-                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                    className={`flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-2xl cursor-pointer transition-all hover:scale-[1.01] ${
+                      selfieFile 
+                        ? 'border-primary bg-primary/5 shadow-md' 
+                        : 'border-border hover:border-primary/50 hover:bg-primary/5'
+                    }`}
                   >
-                    <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">
-                      {selfieFile ? selfieFile.name : 'Prenez un selfie clair de votre visage'}
+                    <Upload className="w-12 h-12 text-primary mb-3" />
+                    <p className="text-base font-medium text-foreground px-4 text-center">
+                      {selfieFile ? `✓ ${selfieFile.name}` : 'Prenez un selfie clair de votre visage'}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Max 5 MB - JPG, PNG
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Max 5 MB • JPG, PNG
                     </p>
                   </label>
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="document" className="text-base font-semibold mb-3 block">
-                  🪪 Photo de la pièce d'identité
+                <Label htmlFor="document" className="text-lg font-bold mb-4 block flex items-center gap-2">
+                  <span className="text-2xl">🪪</span>
+                  Photo de la pièce d'identité
                 </Label>
                 <div className="relative">
                   <input
@@ -263,14 +292,18 @@ export default function VerifyIdentity() {
                   />
                   <label
                     htmlFor="document"
-                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                    className={`flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-2xl cursor-pointer transition-all hover:scale-[1.01] ${
+                      documentFile 
+                        ? 'border-primary bg-primary/5 shadow-md' 
+                        : 'border-border hover:border-primary/50 hover:bg-primary/5'
+                    }`}
                   >
-                    <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">
-                      {documentFile ? documentFile.name : 'Photo recto/verso du document'}
+                    <Upload className="w-12 h-12 text-primary mb-3" />
+                    <p className="text-base font-medium text-foreground px-4 text-center">
+                      {documentFile ? `✓ ${documentFile.name}` : 'Photo recto/verso du document'}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Max 5 MB - JPG, PNG
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Max 5 MB • JPG, PNG
                     </p>
                   </label>
                 </div>
@@ -278,23 +311,49 @@ export default function VerifyIdentity() {
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]"
                 disabled={!selfieFile || !documentFile || loading}
               >
-                {loading ? 'Envoi en cours...' : 'Soumettre pour vérification'}
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin">⏳</span>
+                    Envoi en cours...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Shield className="w-5 h-5" />
+                    Soumettre pour vérification
+                  </span>
+                )}
               </Button>
             </form>
           </Card>
         )}
 
-        <div className="bg-info/10 border border-info/20 rounded-lg p-4">
-          <h3 className="font-semibold text-info mb-2">ℹ️ Pourquoi vérifier mon identité ?</h3>
-          <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Augmenter la confiance des autres utilisateurs</li>
-            <li>• Accéder à plus de fonctionnalités</li>
-            <li>• Sécuriser votre compte et vos trajets</li>
-          </ul>
-        </div>
+        <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20 p-6 shadow-lg animate-fade-in">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-primary/20 rounded-full">
+              <Shield className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg mb-3 text-foreground">Pourquoi vérifier mon identité ?</h3>
+              <ul className="space-y-2.5">
+                <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span className="text-primary font-bold">✓</span>
+                  <span>Augmenter la confiance des autres utilisateurs</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span className="text-primary font-bold">✓</span>
+                  <span>Accéder à plus de fonctionnalités premium</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span className="text-primary font-bold">✓</span>
+                  <span>Sécuriser votre compte et vos trajets</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
   );
