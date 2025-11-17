@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          created_at: string
+          id: string
+          passenger_id: string
+          payment_method: string | null
+          payment_status: string
+          seats_booked: number
+          status: string
+          total_price: number
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          passenger_id: string
+          payment_method?: string | null
+          payment_status?: string
+          seats_booked: number
+          status?: string
+          total_price: number
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          passenger_id?: string
+          payment_method?: string | null
+          payment_status?: string
+          seats_booked?: number
+          status?: string
+          total_price?: number
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       identity_verification: {
         Row: {
           created_at: string
@@ -92,6 +139,57 @@ export type Database = {
           updated_at?: string
           user_id?: string
           verified?: boolean | null
+        }
+        Relationships: []
+      }
+      trips: {
+        Row: {
+          available_seats: number
+          created_at: string
+          departure: string
+          departure_time: string
+          description: string | null
+          destination: string
+          driver_id: string
+          id: string
+          price_per_seat: number
+          status: string
+          updated_at: string
+          vehicle_color: string | null
+          vehicle_model: string
+          vehicle_plate: string | null
+        }
+        Insert: {
+          available_seats: number
+          created_at?: string
+          departure: string
+          departure_time: string
+          description?: string | null
+          destination: string
+          driver_id: string
+          id?: string
+          price_per_seat: number
+          status?: string
+          updated_at?: string
+          vehicle_color?: string | null
+          vehicle_model: string
+          vehicle_plate?: string | null
+        }
+        Update: {
+          available_seats?: number
+          created_at?: string
+          departure?: string
+          departure_time?: string
+          description?: string | null
+          destination?: string
+          driver_id?: string
+          id?: string
+          price_per_seat?: number
+          status?: string
+          updated_at?: string
+          vehicle_color?: string | null
+          vehicle_model?: string
+          vehicle_plate?: string | null
         }
         Relationships: []
       }
