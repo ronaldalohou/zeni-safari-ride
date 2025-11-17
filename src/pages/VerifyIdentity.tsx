@@ -20,7 +20,7 @@ interface Verification {
 }
 
 export default function VerifyIdentity() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<DocumentType>('id_card');
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
@@ -29,12 +29,14 @@ export default function VerifyIdentity() {
   const [verification, setVerification] = useState<Verification | null>(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       navigate('/auth');
       return;
     }
-    fetchVerification();
-  }, [user, navigate]);
+    if (user) {
+      fetchVerification();
+    }
+  }, [user, authLoading, navigate]);
 
   const fetchVerification = async () => {
     if (!user) return;
