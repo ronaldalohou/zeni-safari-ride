@@ -14,21 +14,23 @@ export const BottomNav = () => {
         <Button
           variant="ghost"
           size="icon"
-          className={`flex-col h-auto py-2 ${isActive("/") ? "text-primary" : "text-muted-foreground"}`}
+          className="flex-col h-auto py-2 text-muted-foreground relative"
           onClick={() => navigate("/")}
         >
           <Home className="w-6 h-6" />
           <span className="text-xs mt-1">Accueil</span>
+          {isActive("/") && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />}
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          className={`flex-col h-auto py-2 ${isActive("/search") ? "text-primary" : "text-muted-foreground"}`}
+          className="flex-col h-auto py-2 text-muted-foreground relative"
           onClick={() => navigate("/search")}
         >
           <Search className="w-6 h-6" />
           <span className="text-xs mt-1">Rechercher</span>
+          {isActive("/search") && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />}
         </Button>
 
         <Button
@@ -43,21 +45,23 @@ export const BottomNav = () => {
         <Button
           variant="ghost"
           size="icon"
-          className={`flex-col h-auto py-2 ${isActive("/bookings") ? "text-primary" : "text-muted-foreground"}`}
+          className="flex-col h-auto py-2 text-muted-foreground relative"
           onClick={() => navigate("/bookings")}
         >
           <Search className="w-6 h-6" />
           <span className="text-xs mt-1">Réservations</span>
+          {isActive("/bookings") && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />}
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          className={`flex-col h-auto py-2 ${isActive("/profile") ? "text-primary" : "text-muted-foreground"}`}
+          className="flex-col h-auto py-2 text-muted-foreground relative"
           onClick={() => navigate("/profile")}
         >
           <User className="w-6 h-6" />
           <span className="text-xs mt-1">Profil</span>
+          {isActive("/profile") && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />}
         </Button>
       </div>
     </div>
