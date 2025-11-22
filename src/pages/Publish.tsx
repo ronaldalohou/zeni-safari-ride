@@ -7,9 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, MapPin, Calendar, Users, DollarSign } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const Publish = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     from: "",
     to: "",
@@ -18,13 +22,52 @@ const Publish = () => {
     seats: "3",
     price: "",
     vehicle: "",
+    vehicleColor: "",
+    vehiclePlate: "",
     description: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Trajet publié avec succès ! 🎉");
-    navigate("/");
+    
+    if (!user) {
+      toast.error("Vous devez être connecté");
+      navigate("/auth");
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      // Combine date and time into a timestamp
+      const departureTime = new Date(`${formData.date}T${formData.time}`);
+      
+      const { error } = await supabase
+        .from('trips')
+        .insert({
+          driver_id: user.id,
+          departure: formData.from,
+          destination: formData.to,
+          departure_time: departureTime.toISOString(),
+          available_seats: parseInt(formData.seats),
+          price_per_seat: parseFloat(formData.price),
+          vehicle_model: formData.vehicle || 'Non spécifié',
+          vehicle_color: formData.vehicleColor || null,
+          vehicle_plate: formData.vehiclePlate || null,
+          description: formData.description || null,
+          status: 'active'
+        });
+
+      if (error) throw error;
+
+      toast.success("Trajet publié avec succès ! 🎉");
+      navigate("/");
+    } catch (error: any) {
+      console.error('Erreur:', error);
+      toast.error("Erreur lors de la publication: " + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -153,14 +196,35 @@ const Publish = () => {
 
         {/* Vehicle */}
         <Card className="p-4">
-          <div>
-            <Label htmlFor="vehicle">Véhicule (optionnel)</Label>
-            <Input
-              id="vehicle"
-              placeholder="ex: Toyota Corolla"
-              value={formData.vehicle}
-              onChange={(e) => setFormData({...formData, vehicle: e.target.value})}
-            />
+          <h3 className="font-semibold mb-3">Véhicule</h3>
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="vehicle">Modèle</Label>
+              <Input
+                id="vehicle"
+                placeholder="ex: Toyota Corolla"
+                value={formData.vehicle}
+                onChange={(e) => setFormData({...formData, vehicle: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="vehicleColor">Couleur (optionnel)</Label>
+              <Input
+                id="vehicleColor"
+                placeholder="ex: Blanc"
+                value={formData.vehicleColor}
+                onChange={(e) => setFormData({...formData, vehicleColor: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="vehiclePlate">Immatriculation (optionnel)</Label>
+              <Input
+                id="vehiclePlate"
+                placeholder="ex: BJ-123-AB"
+                value={formData.vehiclePlate}
+                onChange={(e) => setFormData({...formData, vehiclePlate: e.target.value})}
+              />
+            </div>
           </div>
         </Card>
 
@@ -179,8 +243,8 @@ const Publish = () => {
         </Card>
 
         {/* Submit */}
-        <Button type="submit" size="lg" className="w-full">
-          Publier le trajet
+        <Button type="submit" size="lg" className="w-full" disabled={loading}>
+          {loading ? "Publication..." : "Publier le trajet"}
         </Button>
       </form>
     </div>
