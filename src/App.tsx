@@ -10,6 +10,7 @@ import TripDetails from "./pages/TripDetails";
 import Profile from "./pages/Profile";
 import Publish from "./pages/Publish";
 import Bookings from "./pages/Bookings";
+import DriverDashboard from "./pages/DriverDashboard";
 import Auth from "./pages/Auth";
 import VerifyIdentity from "./pages/VerifyIdentity";
 import AdminVerification from "./pages/AdminVerification";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/publish" element={<Publish />} />
           <Route path="/bookings" element={<Bookings />} />
+          <Route path="/driver" element={<DriverDashboard />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/verify-identity" element={<VerifyIdentity />} />
           <Route path="/admin/verifications" element={<AdminVerification />} />
