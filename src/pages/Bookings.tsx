@@ -14,12 +14,14 @@ import { toast } from "sonner";
 
 const Bookings = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBookings = async () => {
+      if (authLoading) return;
+      
       if (!user) {
         navigate('/auth');
         return;
@@ -71,7 +73,7 @@ const Bookings = () => {
     };
 
     fetchBookings();
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   const upcomingBookings = bookings.filter(b => 
     b.status !== 'completed' && b.status !== 'cancelled' && 
