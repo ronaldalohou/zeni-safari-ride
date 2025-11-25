@@ -9,7 +9,7 @@ export const BottomNav = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg safe-bottom">
       <div className="flex items-center justify-around p-2 max-w-md mx-auto">
         <Button
           variant="ghost"

@@ -56,8 +56,8 @@ export default function Home() {
   }, [user]);
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="bg-gradient-to-br from-primary to-secondary text-white p-4 rounded-b-3xl">
+    <div className="min-h-screen bg-background pb-24 safe-bottom">
+      <div className="bg-gradient-to-br from-primary to-secondary text-white p-4 pt-4 safe-top rounded-b-3xl">
         <h1 className="text-2xl font-bold mb-1">🚗 ZeMi</h1>
         <p className="text-sm text-white/90">Trajets disponibles</p>
       </div>
