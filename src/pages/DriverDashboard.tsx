@@ -49,14 +49,27 @@ const DriverDashboard = () => {
           .from('bookings')
           .select(`
             *,
-            trips (departure, destination, departure_time),
-            profiles:passenger_id (full_name, rating, phone)
+            trips (departure, destination, departure_time)
           `)
           .in('trip_id', tripIds)
           .order('created_at', { ascending: false });
 
         if (bookingsError) throw bookingsError;
-        setBookingRequests(bookingsData || []);
+        
+        // Fetch passenger profiles separately
+        const passengerIds = [...new Set(bookingsData?.map(b => b.passenger_id) || [])];
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, rating, phone')
+          .in('user_id', passengerIds);
+        
+        // Merge profiles with bookings
+        const bookingsWithProfiles = bookingsData?.map(booking => ({
+          ...booking,
+          profiles: profilesData?.find(p => p.user_id === booking.passenger_id) || null
+        })) || [];
+        
+        setBookingRequests(bookingsWithProfiles);
       }
 
       setMyTrips(tripsData || []);

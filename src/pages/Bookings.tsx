@@ -26,28 +26,42 @@ const Bookings = () => {
       }
 
       try {
-        const { data, error } = await supabase
+        const { data: bookingsData, error } = await supabase
           .from('bookings')
           .select(`
             *,
             trips (
+              id,
               departure,
               destination,
               departure_time,
               price_per_seat,
               vehicle_model,
-              driver_id,
-              profiles:driver_id (
-                full_name,
-                rating
-              )
+              driver_id
             )
           `)
           .eq('passenger_id', user.id)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setBookings(data || []);
+        
+        // Fetch driver profiles separately
+        const driverIds = [...new Set(bookingsData?.map(b => b.trips?.driver_id).filter(Boolean) || [])];
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, rating')
+          .in('user_id', driverIds);
+        
+        // Merge profiles with bookings
+        const bookingsWithProfiles = bookingsData?.map(booking => ({
+          ...booking,
+          trips: booking.trips ? {
+            ...booking.trips,
+            profiles: profilesData?.find(p => p.user_id === booking.trips?.driver_id) || null
+          } : null
+        })) || [];
+        
+        setBookings(bookingsWithProfiles);
       } catch (error: any) {
         console.error('Erreur:', error);
         toast.error("Impossible de charger les réservations");
