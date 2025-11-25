@@ -14,19 +14,21 @@ import { toast } from "sonner";
 
 const DriverDashboard = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [myTrips, setMyTrips] = useState<any[]>([]);
   const [bookingRequests, setBookingRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
+    
     if (!user) {
       navigate('/auth');
       return;
     }
 
     fetchData();
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   const fetchData = async () => {
     if (!user) return;
