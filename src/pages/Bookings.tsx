@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, Clock, Star, Calendar, MessageCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Star, Calendar, MessageCircle, X } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -109,7 +110,43 @@ const Bookings = () => {
     }
   };
 
-  const upcomingBookings = bookings.filter(b => 
+  const handleCancelBooking = async (bookingId: string, tripId: string, seatsBooked: number) => {
+    try {
+      // Update booking status to cancelled
+      const { error: bookingError } = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled' })
+        .eq('id', bookingId);
+
+      if (bookingError) throw bookingError;
+
+      // Restore available seats
+      const { data: tripData } = await supabase
+        .from('trips')
+        .select('available_seats')
+        .eq('id', tripId)
+        .single();
+
+      if (tripData) {
+        await supabase
+          .from('trips')
+          .update({ available_seats: tripData.available_seats + seatsBooked })
+          .eq('id', tripId);
+      }
+
+      toast.success("Réservation annulée");
+      
+      // Update local state
+      setBookings(prev => prev.map(b => 
+        b.id === bookingId ? { ...b, status: 'cancelled' } : b
+      ));
+    } catch (error: any) {
+      console.error('Erreur:', error);
+      toast.error("Erreur lors de l'annulation");
+    }
+  };
+
+  const upcomingBookings = bookings.filter(b =>
     b.status !== 'completed' && b.status !== 'cancelled' && 
     new Date(b.trips?.departure_time) > new Date()
   );
@@ -228,6 +265,36 @@ const Bookings = () => {
             >
               Voir trajet
             </Button>
+          )}
+
+          {/* Cancel button for upcoming trips */}
+          {!isPastTrip && (booking.status === 'pending' || booking.status === 'confirmed') && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  <X className="w-4 h-4 mr-2" />
+                  Annuler
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Annuler la réservation ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Êtes-vous sûr de vouloir annuler cette réservation pour le trajet {trip.departure} → {trip.destination} ?
+                    Cette action est irréversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Non, garder</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => handleCancelBooking(booking.id, trip.id, booking.seats_booked)}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Oui, annuler
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
 
           {/* Rating button for past trips */}
