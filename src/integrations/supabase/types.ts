@@ -177,6 +177,44 @@ export type Database = {
         }
         Relationships: []
       }
+      ratings: {
+        Row: {
+          booking_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rated_user_id: string
+          rater_id: string
+          rating: number
+        }
+        Insert: {
+          booking_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rated_user_id: string
+          rater_id: string
+          rating: number
+        }
+        Update: {
+          booking_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rated_user_id?: string
+          rater_id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trips: {
         Row: {
           available_seats: number
