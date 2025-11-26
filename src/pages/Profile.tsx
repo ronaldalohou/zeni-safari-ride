@@ -8,7 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { BottomNav } from "@/components/BottomNav";
 import { ProfileReviews } from "@/components/ProfileReviews";
-import { Star, Calendar, Phone, Mail, ShieldCheck, LogOut, Car } from "lucide-react";
+import { ProfileEditModal } from "@/components/ProfileEditModal";
+import { Star, Calendar, Phone, Mail, ShieldCheck, LogOut, Car, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 interface Profile {
@@ -26,6 +27,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -81,6 +83,14 @@ export default function Profile() {
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold">{profile.full_name}</h1>
               {profile.verified && <ShieldCheck className="w-5 h-5 text-success" />}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-white hover:bg-white/20"
+                onClick={() => setEditModalOpen(true)}
+              >
+                <Pencil className="w-4 h-4" />
+              </Button>
             </div>
             <div className="flex items-center gap-2 mt-1">
               <div className="flex items-center">
@@ -148,6 +158,20 @@ export default function Profile() {
           Se déconnecter
         </Button>
       </div>
+
+      {/* Edit Profile Modal */}
+      {profile && (
+        <ProfileEditModal
+          isOpen={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          profile={{
+            full_name: profile.full_name,
+            phone: profile.phone,
+            photo_url: profile.photo_url,
+          }}
+          onProfileUpdated={fetchProfile}
+        />
+      )}
 
       <BottomNav />
     </div>
