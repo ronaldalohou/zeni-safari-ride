@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { BottomNav } from "@/components/BottomNav";
-import { Star, Calendar, Phone, Mail, ShieldCheck, LogOut } from "lucide-react";
+import { Star, Calendar, Phone, Mail, ShieldCheck, LogOut, Car } from "lucide-react";
 import { toast } from "sonner";
 
 interface Profile {
@@ -127,6 +127,17 @@ export default function Profile() {
               <Button onClick={() => navigate('/verify-identity')} variant="outline" className="w-full">Vérifier mon identité</Button>
             </>
           )}
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Car className="w-6 h-6 text-primary" />
+            <h2 className="text-lg font-semibold">Espace conducteur</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">Gérez vos trajets publiés et les demandes de réservation.</p>
+          <Button onClick={() => navigate('/driver')} variant="outline" className="w-full">
+            Tableau de bord conducteur
+          </Button>
         </Card>
 
         <Button variant="outline" className="w-full" onClick={handleLogout}>
