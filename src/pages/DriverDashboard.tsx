@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, MapPin, Clock, Users, Check, X, DollarSign, MessageCircle } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -83,7 +84,7 @@ const DriverDashboard = () => {
     }
   };
 
-  const handleBookingAction = async (bookingId: string, action: 'confirmed' | 'cancelled') => {
+  const handleBookingAction = async (bookingId: string, action: 'confirmed' | 'cancelled', restoreSeats?: { tripId: string; seatsBooked: number }) => {
     try {
       const { error } = await supabase
         .from('bookings')
@@ -92,7 +93,23 @@ const DriverDashboard = () => {
 
       if (error) throw error;
 
-      toast.success(action === 'confirmed' ? 'Réservation acceptée' : 'Réservation refusée');
+      // Restore seats if cancelling a confirmed booking
+      if (action === 'cancelled' && restoreSeats) {
+        const { data: tripData } = await supabase
+          .from('trips')
+          .select('available_seats')
+          .eq('id', restoreSeats.tripId)
+          .single();
+
+        if (tripData) {
+          await supabase
+            .from('trips')
+            .update({ available_seats: tripData.available_seats + restoreSeats.seatsBooked })
+            .eq('id', restoreSeats.tripId);
+        }
+      }
+
+      toast.success(action === 'confirmed' ? 'Réservation acceptée' : 'Réservation annulée');
       fetchData(); // Refresh data
     } catch (error: any) {
       console.error('Erreur:', error);
@@ -280,33 +297,86 @@ const DriverDashboard = () => {
 
                 {bookingRequests.filter(b => b.status !== 'pending').length > 0 && (
                   <>
-                    <h3 className="font-semibold mt-6 mb-2">Historique</h3>
+                    <h3 className="font-semibold mt-6 mb-2">Réservations confirmées</h3>
                     {bookingRequests
                       .filter(b => b.status !== 'pending')
-                      .map(booking => (
-                        <Card key={booking.id} className="p-4">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-10 h-10">
-                              <AvatarFallback className="bg-muted text-xs">
-                                {booking.profiles?.full_name?.split(' ').map((n: string) => n[0]).join('') || 'P'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="font-medium text-sm">{booking.profiles?.full_name || 'Passager'}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {booking.seats_booked} place(s) • {booking.total_price} CFA
+                      .map(booking => {
+                        const tripTime = new Date(booking.trips?.departure_time);
+                        const isPast = tripTime <= new Date();
+                        
+                        return (
+                          <Card key={booking.id} className="p-4">
+                            <div className="flex items-center gap-3 mb-3">
+                              <Avatar className="w-10 h-10">
+                                <AvatarFallback className="bg-muted text-xs">
+                                  {booking.profiles?.full_name?.split(' ').map((n: string) => n[0]).join('') || 'P'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <div className="font-medium text-sm">{booking.profiles?.full_name || 'Passager'}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {booking.trips?.departure} → {booking.trips?.destination}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {booking.seats_booked} place(s) • {booking.total_price} CFA
+                                </div>
+                              </div>
+                              <div className={`text-xs px-2 py-1 rounded-full ${
+                                booking.status === 'confirmed' 
+                                  ? 'bg-primary/10 text-primary' 
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                                {booking.status === 'confirmed' ? 'Accepté' : 'Annulé'}
                               </div>
                             </div>
-                            <div className={`text-xs px-2 py-1 rounded-full ${
-                              booking.status === 'confirmed' 
-                                ? 'bg-primary/10 text-primary' 
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {booking.status === 'confirmed' ? 'Accepté' : 'Refusé'}
+                            
+                            {/* Action buttons */}
+                            <div className="flex gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                className="flex-1 gap-2"
+                                onClick={() => navigate(`/messages?booking=${booking.id}`)}
+                              >
+                                <MessageCircle className="w-4 h-4" />
+                                Message
+                              </Button>
+                              
+                              {booking.status === 'confirmed' && !isPast && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="destructive" className="gap-2">
+                                      <X className="w-4 h-4" />
+                                      Annuler
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Annuler cette réservation ?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Êtes-vous sûr de vouloir annuler la réservation de {booking.profiles?.full_name || 'ce passager'} ?
+                                        Les places seront remises en disponibilité.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Non, garder</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleBookingAction(booking.id, 'cancelled', {
+                                          tripId: booking.trip_id,
+                                          seatsBooked: booking.seats_booked
+                                        })}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Oui, annuler
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
                             </div>
-                          </div>
-                        </Card>
-                      ))}
+                          </Card>
+                        );
+                      })}
                   </>
                 )}
               </>
