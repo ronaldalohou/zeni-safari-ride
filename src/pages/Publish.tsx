@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, MapPin, Calendar, Users, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,9 +72,9 @@ const Publish = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-6 safe-bottom">
+    <div className="h-screen flex flex-col bg-background safe-bottom">
       {/* Header */}
-      <div className="bg-primary text-primary-foreground p-4 pt-4 safe-top sticky top-0 z-10">
+      <div className="bg-primary text-primary-foreground p-4 pt-4 safe-top flex-shrink-0">
         <div className="flex items-center gap-3">
           <Button 
             variant="ghost" 
@@ -90,7 +91,8 @@ const Publish = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 space-y-4">
+      <ScrollArea className="flex-1">
+        <form onSubmit={handleSubmit} className="p-4 pb-8 space-y-4">
         {/* Itinerary */}
         <Card className="p-4">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
@@ -246,7 +248,8 @@ const Publish = () => {
         <Button type="submit" size="lg" className="w-full" disabled={loading}>
           {loading ? "Publication..." : "Publier le trajet"}
         </Button>
-      </form>
+        </form>
+      </ScrollArea>
     </div>
   );
 };
