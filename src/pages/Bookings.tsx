@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, Clock, Star, Calendar } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Star, Calendar, MessageCircle } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -166,24 +166,34 @@ const Bookings = () => {
         </div>
 
         {/* Action buttons based on status */}
-        {booking.status === 'confirmed' && booking.payment_status === 'pending' && (
-          <Button 
-            className="w-full mt-3"
-            onClick={() => toast.info("Paiement bientôt disponible", { description: "L'intégration PayDunya arrive bientôt" })}
-          >
-            Procéder au paiement
-          </Button>
-        )}
+        <div className="flex gap-2 mt-3">
+          {booking.status === 'confirmed' && booking.payment_status === 'pending' && (
+            <Button 
+              className="flex-1"
+              onClick={() => toast.info("Paiement bientôt disponible", { description: "L'intégration PayDunya arrive bientôt" })}
+            >
+              Procéder au paiement
+            </Button>
+          )}
 
-        {booking.status === 'pending' && (
           <Button 
-            variant="outline" 
-            className="w-full mt-3"
-            onClick={() => navigate(`/trip/${trip.id}`)}
+            variant={booking.status === 'confirmed' ? "outline" : "default"}
+            className={booking.status === 'confirmed' ? "" : "flex-1"}
+            onClick={() => navigate(`/messages?booking=${booking.id}`)}
           >
-            Voir le trajet
+            <MessageCircle className="w-4 h-4 mr-2" />
+            Message
           </Button>
-        )}
+
+          {booking.status === 'pending' && (
+            <Button 
+              variant="outline" 
+              onClick={() => navigate(`/trip/${trip.id}`)}
+            >
+              Voir trajet
+            </Button>
+          )}
+        </div>
       </Card>
     );
   };

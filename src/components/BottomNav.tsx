@@ -1,4 +1,4 @@
-import { Home, Car, User, Plus, Calendar } from "lucide-react";
+import { Home, MessageCircle, User, Plus, Calendar } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -26,11 +26,11 @@ export const BottomNav = () => {
           variant="ghost"
           size="icon"
           className="flex-col h-auto py-2 text-muted-foreground relative"
-          onClick={() => navigate("/driver")}
+          onClick={() => navigate("/messages")}
         >
-          <Car className="w-6 h-6" />
-          <span className="text-xs mt-1">Conducteur</span>
-          {isActive("/driver") && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />}
+          <MessageCircle className="w-6 h-6" />
+          <span className="text-xs mt-1">Messages</span>
+          {isActive("/messages") && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />}
         </Button>
 
         <Button

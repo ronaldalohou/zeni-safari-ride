@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, Clock, Users, Check, X, DollarSign } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Users, Check, X, DollarSign, MessageCircle } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -264,6 +264,15 @@ const DriverDashboard = () => {
                             Refuser
                           </Button>
                         </div>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="w-full mt-2 gap-2"
+                          onClick={() => navigate(`/messages?booking=${booking.id}`)}
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          Envoyer un message
+                        </Button>
                       </Card>
                     ))}
                   </>
