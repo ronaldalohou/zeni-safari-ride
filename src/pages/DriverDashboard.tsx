@@ -105,9 +105,9 @@ const DriverDashboard = () => {
   const pendingRequests = bookingRequests.filter(b => b.status === 'pending');
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-24 safe-bottom">
       {/* Header */}
-      <div className="bg-primary text-primary-foreground p-4 sticky top-0 z-10">
+      <div className="bg-primary text-primary-foreground p-4 pt-4 safe-top sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <Button 
             variant="ghost" 
