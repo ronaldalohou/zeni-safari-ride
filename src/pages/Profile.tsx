@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { BottomNav } from "@/components/BottomNav";
+import { ProfileReviews } from "@/components/ProfileReviews";
 import { Star, Calendar, Phone, Mail, ShieldCheck, LogOut, Car } from "lucide-react";
 import { toast } from "sonner";
 
@@ -139,6 +140,8 @@ export default function Profile() {
             Tableau de bord conducteur
           </Button>
         </Card>
+
+        {user && <ProfileReviews userId={user.id} />}
 
         <Button variant="outline" className="w-full" onClick={handleLogout}>
           <LogOut className="w-4 h-4 mr-2" />
