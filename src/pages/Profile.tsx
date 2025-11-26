@@ -68,10 +68,10 @@ export default function Profile() {
   const memberSince = new Date(profile.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-24 safe-bottom">
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary" />
-        <div className="relative p-6 flex items-center gap-4">
+        <div className="relative p-6 pt-6 safe-top flex items-center gap-4">
           <Avatar className="h-20 w-20 border-4 border-white">
             <AvatarImage src={profile.photo_url || undefined} />
             <AvatarFallback>{profile.full_name.substring(0, 2).toUpperCase()}</AvatarFallback>

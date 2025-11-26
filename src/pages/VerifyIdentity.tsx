@@ -171,9 +171,9 @@ export default function VerifyIdentity() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20 safe-bottom">
       {/* Header moderne avec bouton retour */}
-      <div className="relative bg-gradient-to-br from-primary via-primary to-primary/80 p-6 text-white shadow-lg">
+      <div className="relative bg-gradient-to-br from-primary via-primary to-primary/80 p-6 pt-6 safe-top text-white shadow-lg">
         <button
           onClick={() => navigate(-1)}
           className="absolute left-4 top-6 flex items-center gap-2 text-white/90 hover:text-white transition-all hover:gap-3 group"
