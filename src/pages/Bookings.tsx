@@ -89,25 +89,33 @@ const Bookings = () => {
     if (!booking.trips) return null;
     
     const trip = booking.trips;
-    const statusText = {
-      pending: 'En attente',
-      confirmed: 'Confirmé',
-      completed: 'Terminé',
-      cancelled: 'Annulé'
-    }[booking.status] || booking.status;
+    const statusConfig: Record<string, { text: string; color: string; description: string }> = {
+      pending: { 
+        text: 'En attente', 
+        color: 'bg-yellow-100 text-yellow-800',
+        description: '⏳ En attente de validation du conducteur'
+      },
+      confirmed: { 
+        text: 'Confirmé', 
+        color: 'bg-primary/10 text-primary',
+        description: '✅ Le conducteur a accepté votre réservation'
+      },
+      completed: { 
+        text: 'Terminé', 
+        color: 'bg-muted text-muted-foreground',
+        description: 'Trajet terminé'
+      },
+      cancelled: { 
+        text: 'Refusé', 
+        color: 'bg-red-100 text-red-800',
+        description: '❌ Réservation refusée par le conducteur'
+      }
+    };
 
-    const statusColor = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      confirmed: 'bg-primary/10 text-primary',
-      completed: 'bg-muted text-muted-foreground',
-      cancelled: 'bg-red-100 text-red-800'
-    }[booking.status] || 'bg-muted text-muted-foreground';
+    const status = statusConfig[booking.status] || statusConfig.pending;
 
     return (
-      <Card 
-        className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
-        onClick={() => navigate(`/trip/${trip.id}`)}
-      >
+      <Card className="p-4 hover:shadow-lg transition-shadow">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
@@ -126,9 +134,14 @@ const Bookings = () => {
               </span>
             </div>
           </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
-            {statusText}
+          <div className={`px-3 py-1 rounded-full text-xs font-medium ${status.color}`}>
+            {status.text}
           </div>
+        </div>
+
+        {/* Status message */}
+        <div className="bg-muted/50 rounded-lg p-2 mb-3 text-sm">
+          {status.description}
         </div>
 
         <div className="flex items-center justify-between pt-3 border-t">
@@ -151,6 +164,26 @@ const Bookings = () => {
             <div className="text-xs text-muted-foreground">{booking.seats_booked} place(s)</div>
           </div>
         </div>
+
+        {/* Action buttons based on status */}
+        {booking.status === 'confirmed' && booking.payment_status === 'pending' && (
+          <Button 
+            className="w-full mt-3"
+            onClick={() => toast.info("Paiement bientôt disponible", { description: "L'intégration PayDunya arrive bientôt" })}
+          >
+            Procéder au paiement
+          </Button>
+        )}
+
+        {booking.status === 'pending' && (
+          <Button 
+            variant="outline" 
+            className="w-full mt-3"
+            onClick={() => navigate(`/trip/${trip.id}`)}
+          >
+            Voir le trajet
+          </Button>
+        )}
       </Card>
     );
   };
