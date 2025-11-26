@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { BottomNav } from "@/components/BottomNav";
+import { NotificationBell } from "@/components/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -58,8 +59,13 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background pb-24 safe-bottom">
       <div className="bg-gradient-to-br from-primary to-secondary text-white p-4 pt-4 safe-top rounded-b-3xl">
-        <h1 className="text-2xl font-bold mb-1">🚗 ZeMi</h1>
-        <p className="text-sm text-white/90">Trajets disponibles</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold mb-1">🚗 ZeMi</h1>
+            <p className="text-sm text-white/90">Trajets disponibles</p>
+          </div>
+          <NotificationBell />
+        </div>
       </div>
 
       <div className="p-4">
