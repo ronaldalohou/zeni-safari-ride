@@ -11,12 +11,20 @@ import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
+import { RatingModal } from "@/components/RatingModal";
 
 const Bookings = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [bookings, setBookings] = useState<any[]>([]);
+  const [userRatings, setUserRatings] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ratingModal, setRatingModal] = useState<{
+    isOpen: boolean;
+    bookingId: string;
+    ratedUserId: string;
+    ratedUserName: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -54,6 +62,18 @@ const Bookings = () => {
           .select('user_id, full_name, rating')
           .in('user_id', driverIds);
         
+        // Fetch user's existing ratings
+        const bookingIds = bookingsData?.map(b => b.id) || [];
+        if (bookingIds.length > 0) {
+          const { data: ratingsData } = await supabase
+            .from('ratings')
+            .select('booking_id')
+            .eq('rater_id', user.id)
+            .in('booking_id', bookingIds);
+          
+          setUserRatings(ratingsData?.map(r => r.booking_id) || []);
+        }
+        
         // Merge profiles with bookings
         const bookingsWithProfiles = bookingsData?.map(booking => ({
           ...booking,
@@ -75,6 +95,20 @@ const Bookings = () => {
     fetchBookings();
   }, [user, authLoading, navigate]);
 
+  const refreshBookings = () => {
+    setLoading(true);
+    // Re-trigger the effect by updating a dependency
+    if (user) {
+      supabase
+        .from('ratings')
+        .select('booking_id')
+        .eq('rater_id', user.id)
+        .then(({ data }) => {
+          setUserRatings(data?.map(r => r.booking_id) || []);
+        });
+    }
+  };
+
   const upcomingBookings = bookings.filter(b => 
     b.status !== 'completed' && b.status !== 'cancelled' && 
     new Date(b.trips?.departure_time) > new Date()
@@ -89,6 +123,7 @@ const Bookings = () => {
     if (!booking.trips) return null;
     
     const trip = booking.trips;
+    const isPastTrip = new Date(trip.departure_time) <= new Date();
     const statusConfig: Record<string, { text: string; color: string; description: string }> = {
       pending: { 
         text: 'En attente', 
@@ -166,8 +201,8 @@ const Bookings = () => {
         </div>
 
         {/* Action buttons based on status */}
-        <div className="flex gap-2 mt-3">
-          {booking.status === 'confirmed' && booking.payment_status === 'pending' && (
+        <div className="flex gap-2 mt-3 flex-wrap">
+          {booking.status === 'confirmed' && booking.payment_status === 'pending' && new Date(trip.departure_time) > new Date() && (
             <Button 
               className="flex-1"
               onClick={() => toast.info("Paiement bientôt disponible", { description: "L'intégration PayDunya arrive bientôt" })}
@@ -177,8 +212,8 @@ const Bookings = () => {
           )}
 
           <Button 
-            variant={booking.status === 'confirmed' ? "outline" : "default"}
-            className={booking.status === 'confirmed' ? "" : "flex-1"}
+            variant="outline"
+            size="sm"
             onClick={() => navigate(`/messages?booking=${booking.id}`)}
           >
             <MessageCircle className="w-4 h-4 mr-2" />
@@ -187,11 +222,36 @@ const Bookings = () => {
 
           {booking.status === 'pending' && (
             <Button 
-              variant="outline" 
+              variant="outline"
+              size="sm"
               onClick={() => navigate(`/trip/${trip.id}`)}
             >
               Voir trajet
             </Button>
+          )}
+
+          {/* Rating button for past trips */}
+          {isPastTrip && !userRatings.includes(booking.id) && booking.status !== 'cancelled' && (
+            <Button 
+              variant="secondary"
+              size="sm"
+              onClick={() => setRatingModal({
+                isOpen: true,
+                bookingId: booking.id,
+                ratedUserId: trip.driver_id,
+                ratedUserName: trip.profiles?.full_name || 'Conducteur'
+              })}
+            >
+              <Star className="w-4 h-4 mr-2" />
+              Évaluer
+            </Button>
+          )}
+
+          {isPastTrip && userRatings.includes(booking.id) && (
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Star className="w-3 h-3 fill-accent text-accent" />
+              Évalué
+            </span>
           )}
         </div>
       </Card>
@@ -257,6 +317,18 @@ const Bookings = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Rating Modal */}
+      {ratingModal && (
+        <RatingModal
+          isOpen={ratingModal.isOpen}
+          onClose={() => setRatingModal(null)}
+          bookingId={ratingModal.bookingId}
+          ratedUserId={ratingModal.ratedUserId}
+          ratedUserName={ratingModal.ratedUserName}
+          onRatingSubmitted={refreshBookings}
+        />
+      )}
 
       <BottomNav />
     </div>
