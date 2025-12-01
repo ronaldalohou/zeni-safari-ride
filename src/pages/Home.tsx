@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { MapPin, Users, Clock } from "lucide-react";
+import { MapPin, Users, Clock, Car } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -61,7 +61,10 @@ export default function Home() {
       <div className="bg-gradient-to-br from-primary to-secondary text-white p-4 pt-4 safe-top rounded-b-3xl">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold mb-1">🚗 ZeMi</h1>
+            <div className="flex items-center gap-2 mb-1">
+              <Car className="w-6 h-6" />
+              <h1 className="text-2xl font-bold">ZeMi</h1>
+            </div>
             <p className="text-sm text-white/90">Trajets disponibles</p>
           </div>
           <NotificationBell />
@@ -69,7 +72,7 @@ export default function Home() {
       </div>
 
       <div className="p-4">
-        <h2 className="text-lg font-bold mb-3">Trajets 🚗</h2>
+        <h2 className="text-lg font-bold mb-3">Trajets</h2>
         
         {loadingTrips ? (
           <div className="text-center py-8 text-muted-foreground">Chargement...</div>
