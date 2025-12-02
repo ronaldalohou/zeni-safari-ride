@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.4ff1f291846d45119307725301fbb9df',
+  appId: 'com.zemi.ride',
   appName: 'ZeMi',
   webDir: 'dist',
   server: {
